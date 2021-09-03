@@ -8,11 +8,18 @@ use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
+    /**
+     * ArticleController constructor.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api')->except('index', 'show');
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -20,7 +27,7 @@ class ArticleController extends Controller
      */
     public function index(): JsonResponse
     {
-        $articles = Article::all();
+        $articles = Article::paginate();
         return response()->json(new ArticleCollection($articles));
     }
 
@@ -84,11 +91,14 @@ class ArticleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
-     * @return Response
+     * @param Article $article
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Article $article): JsonResponse
     {
-        //
+        $article->delete();
+        return \response()->json([
+            'message' => 'deleted'
+        ]);
     }
 }
